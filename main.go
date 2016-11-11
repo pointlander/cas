@@ -12,14 +12,14 @@ import (
 	"runtime/pprof"
 
 	"github.com/chzyer/readline"
-	"github.com/robertkrimen/otto"
+	"github.com/dop251/goja"
 )
 
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 
 func main() {
-	vm := otto.New()
-	_, err := vm.Run("window = {};")
+	vm := goja.New()
+	_, err := vm.RunString("window = {};")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -28,11 +28,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	script, err := vm.Compile("", algebrite)
+
+	program, err := goja.Compile("algebrite", string(algebrite), true)
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = vm.Run(script)
+	_, err = vm.RunProgram(program)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -53,15 +54,20 @@ func main() {
 	}
 	defer rl.Close()
 
+	run, valid := goja.AssertFunction(vm.Get("window.Algebrite.run"))
+	if !valid {
+		log.Fatal("window.Algebrite.run is not a function")
+	}
 	for {
 		line, err := rl.Readline()
 		if err != nil {
 			break
 		}
-		result, err := vm.Call("window.Algebrite.run", nil, line)
+
+		result, err := run(goja.Null(), vm.ToValue(line))
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(result)
+		fmt.Println(result.Export())
 	}
 }
