@@ -12,37 +12,39 @@ import (
 	"runtime/pprof"
 
 	"github.com/chzyer/readline"
-	"github.com/dop251/goja"
 )
 
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 
+type CAS interface {
+	Compile(algebrite []byte) error
+	Load() error
+	Run(line string) (string, error)
+}
+
 func main() {
-	vm := goja.New()
-	_, err := vm.RunString("window = {};")
-	if err != nil {
-		log.Fatal(err)
-	}
+	var cas CAS = NewGOJA()
+
 	// for license see: https://github.com/davidedc/Algebrite
 	algebrite, err := algebriteBundleForBrowserJsBytes()
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
-	program, err := goja.Compile("algebrite", string(algebrite), true)
+	err = cas.Compile(algebrite)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
-	_, err = vm.RunProgram(program)
+	err = cas.Load()
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	flag.Parse()
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
 		if err != nil {
-			log.Fatal(err)
+			log.Panic(err)
 		}
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
@@ -50,26 +52,20 @@ func main() {
 
 	rl, err := readline.New("> ")
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	defer rl.Close()
 
-	window := vm.Get("window").ToObject(vm)
-	alg := window.Get("Algebrite").ToObject(vm)
-	run, valid := goja.AssertFunction(alg.Get("run"))
-	if !valid {
-		log.Fatal("window.Algebrite.run is not a function")
-	}
 	for {
 		line, err := rl.Readline()
 		if err != nil {
 			break
 		}
 
-		result, err := run(goja.Null(), vm.ToValue(line))
+		result, err := cas.Run(line)
 		if err != nil {
-			log.Fatal(err)
+			log.Panic(err)
 		}
-		fmt.Println(result.Export())
+		fmt.Println(result)
 	}
 }
