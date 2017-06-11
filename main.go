@@ -12,36 +12,39 @@ import (
 	"runtime/pprof"
 
 	"github.com/chzyer/readline"
-	"github.com/robertkrimen/otto"
 )
 
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 
+type CAS interface {
+	Compile(algebrite []byte) error
+	Load() error
+	Run(line string) (string, error)
+}
+
 func main() {
-	vm := otto.New()
-	_, err := vm.Run("window = {};")
-	if err != nil {
-		log.Fatal(err)
-	}
+	var cas CAS = NewGOJA()
+
 	// for license see: https://github.com/davidedc/Algebrite
 	algebrite, err := algebriteBundleForBrowserJsBytes()
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
-	script, err := vm.Compile("", algebrite)
+
+	err = cas.Compile(algebrite)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
-	_, err = vm.Run(script)
+	err = cas.Load()
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	flag.Parse()
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
 		if err != nil {
-			log.Fatal(err)
+			log.Panic(err)
 		}
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
@@ -49,7 +52,7 @@ func main() {
 
 	rl, err := readline.New("> ")
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	defer rl.Close()
 
@@ -58,9 +61,10 @@ func main() {
 		if err != nil {
 			break
 		}
-		result, err := vm.Call("window.Algebrite.run", nil, line)
+
+		result, err := cas.Run(line)
 		if err != nil {
-			log.Fatal(err)
+			log.Panic(err)
 		}
 		fmt.Println(result)
 	}
