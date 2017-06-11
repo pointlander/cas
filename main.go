@@ -23,7 +23,7 @@ type CAS interface {
 }
 
 func main() {
-	var cas CAS = NewGOJA()
+	cas := NewGOJA()
 
 	// for license see: https://github.com/davidedc/Algebrite
 	algebrite, err := algebriteBundleForBrowserJsBytes()
