@@ -54,7 +54,9 @@ func main() {
 	}
 	defer rl.Close()
 
-	run, valid := goja.AssertFunction(vm.Get("window.Algebrite.run"))
+	window := vm.Get("window").ToObject(vm)
+	alg := window.Get("Algebrite").ToObject(vm)
+	run, valid := goja.AssertFunction(alg.Get("run"))
 	if !valid {
 		log.Fatal("window.Algebrite.run is not a function")
 	}
