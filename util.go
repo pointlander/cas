@@ -6,7 +6,7 @@ import (
 )
 
 func BenchmarkCompile(b *testing.B, newCAS func() CAS) {
-	algebrite, err := algebriteBundleForBrowserJsBytes()
+	algebrite, err := ReadFile("algebrite.bundle-for-browser.js")
 	if err != nil {
 		log.Panic(err)
 	}
@@ -24,7 +24,7 @@ func BenchmarkCompile(b *testing.B, newCAS func() CAS) {
 }
 
 func BenchmarkLoad(b *testing.B, newCAS func() CAS) {
-	algebrite, err := algebriteBundleForBrowserJsBytes()
+	algebrite, err := ReadFile("algebrite.bundle-for-browser.js")
 	if err != nil {
 		log.Panic(err)
 	}
@@ -46,7 +46,7 @@ func BenchmarkLoad(b *testing.B, newCAS func() CAS) {
 }
 
 func BenchmarkRun(b *testing.B, newCAS func() CAS) {
-	algebrite, err := algebriteBundleForBrowserJsBytes()
+	algebrite, err := ReadFile("algebrite.bundle-for-browser.js")
 	if err != nil {
 		log.Panic(err)
 	}

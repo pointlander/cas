@@ -1,0 +1,26 @@
+{
+  "pkg": "main",
+  "dest": "./",
+  "fmt": true,
+  "tags": "",
+  "compression": {
+    "compress": true,
+    "method": "BestCompression",
+    "keep": false
+  },
+  "clean": false,
+  "output": "ab0x.go",
+  "unexporTed": false,
+  "spread": false,
+  "debug": false,
+  "custom": [
+    {
+      "files": [
+        "algebrite.bundle-for-browser.js"
+      ],
+      "base": "",
+      "prefix": "",
+      "tags": ""
+    }
+  ]
+}

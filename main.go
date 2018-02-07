@@ -26,7 +26,7 @@ func main() {
 	cas := NewGOJA()
 
 	// for license see: https://github.com/davidedc/Algebrite
-	algebrite, err := algebriteBundleForBrowserJsBytes()
+	algebrite, err := ReadFile("algebrite.bundle-for-browser.js")
 	if err != nil {
 		log.Panic(err)
 	}
